@@ -24,6 +24,7 @@
         <module>my-account-dao</module>
         <module>my-account-model</module>
         <module>my-account-admin</module>
+        <module>my-test</module>
     </modules>
 
     <properties>
