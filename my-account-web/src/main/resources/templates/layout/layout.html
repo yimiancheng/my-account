@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
+<head th:replace="/layout/base_common :: common_header(~{::title},~{::link}, ~{::script})">
+    <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">记账本</title>
+    <!-- ~{::} 只能加载一个文件的-->
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div th:replace="/layout/base_common :: header"></div>
+        <div class="panel panel-info" layout:fragment="panel">
+            <div class="panel-heading">
+                <div class="row">
+                    <span class="panel-title col-sm-6">统计</span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div th:replace="/layout/nav-tabs :: nav"></div>
+                    </div>
+                    <div class="col-md-10" style="border-left: 1px solid #e1e1e8">
+                        <div layout:fragment="content">
+                            页面内容
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="common_header(title, links, scripts)">
+    <meta charset="UTF-8">
+    <th:block th:if="${title}">
+        <title th:replace="${title}">标题</title>
+    </th:block>
+    <link rel="stylesheet" th:href="@{/bootstrap-3.3.7/css/bootstrap.min.css}"
+          href="../../static/bootstrap-3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" th:href="@{/bootstrap-3.3.7/css/bootstrap-theme.css}"
+          href="../../static/bootstrap-3.3.7/css/bootstrap-theme.css" />
+    <script th:src="@{/jquery.min.js}" src="../../static/jquery.min.js"></script>
+    <script th:src="@{/bootstrap-3.3.7/js/bootstrap.min.js}"
+            src="../../static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script th:src="@{/nav-init.js}" src="../../static/nav-init.js"></script>
+
+    <th:block th:if="${links}">
+        <th:block th:replace="${links}" />
+    </th:block>
+
+    <th:block th:if="${scripts}">
+        <th:block th:replace="${scripts}" />
+    </th:block>
+</head>
+<body>
+    <div th:fragment="header" class="page-header" style="padding: 0px; margin: 0px">
+        <h3 style="display:inline-block"><span class="label label-success">Family book</span></h3>
+        <h3 style="display:inline-block" class="pull-right">
+            <a type="button" class="btn  btn-primary btn-sm" th:href="@{/login}" href="../login.html">登录</a>
+            <span class="badge"
+                  th:text="${#dates.format(new java.util.Date().getTime(), 'yyyy-MM-dd HH:mm:ss')}">
+            </span>
+        </h3>
+    </div>
+</body>
+</html>
