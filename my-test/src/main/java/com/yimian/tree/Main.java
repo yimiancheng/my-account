@@ -34,18 +34,18 @@ public class Main {
 
         log.info("tree size = {}", ALL_TREE.size());
         Tree trees = convert2Tree(ALL_TREE);
-        log.info("my {}", new Gson().toJson(tree));
+        log.info("{}", new Gson().toJson(trees));
 
         Set<Integer> roleTreeIds = new HashSet<>();
-        roleTreeIds.add(2);
         log.info("ROLE_TREE = {}", ROLE_TREE.stream().map(Tree::getId).collect(Collectors.toList()));
         ROLE_TREE.stream().forEach(item -> getAllIds(item.getTrace(), roleTreeIds));
         log.info("roleTreeIds = {}", roleTreeIds);
 
-        tagging(tree, roleTreeIds);
+        // 不需要标注，一次遍历直接取出结果
+        // tagging(tree, roleTreeIds);
 
         Tree result = Tree.builder().build();
-        roleTree(tree, result, true);
+        roleTree(tree, result, true, roleTreeIds);
         log.info("result = {}", new Gson().toJson(result));
     }
 
@@ -54,7 +54,7 @@ public class Main {
      */
     private static Tree convert2Tree(Set<Tree> trees) {
         Tree root = Tree.builder().build();
-        root.setId(ATOMIC_INTEGER.incrementAndGet());
+        root.setId(1);
         root.setLevel(-1);
         root.setPid(0);
         root.setTrace(String.format(TRACE_FORMAT, root.getId()));
@@ -72,7 +72,8 @@ public class Main {
             return;
         }
 
-        treesLevel.stream().sorted(Comparator.comparing(Tree::getId)/*.reversed()*/);
+        // .reversed()
+        treesLevel = treesLevel.stream().sorted(Comparator.comparing(Tree::getId)).collect(Collectors.toList());
 
         if(ptree != null) {
             ptree.setTrees(treesLevel);
@@ -99,7 +100,7 @@ public class Main {
     /**
      * 输出结果
      */
-    private static void roleTree(Tree tree, Tree result, boolean checkRole) {
+    private static void roleTree(Tree tree, Tree result, boolean checkRole, Set<Integer> roleTreeIds) {
         Tree treeCopy = null;
 
         if(tree == null) {
@@ -111,12 +112,17 @@ public class Main {
             treeCopy = result;
         }
         else {
-            boolean show = !checkRole || (checkRole && tree.getRole() > 0);
+            // boolean show = !checkRole || (checkRole && tree.getRole() > 0);
+            boolean show = !checkRole || (checkRole && roleTreeIds.contains(tree.getId()));
 
             if(show) {
                 treeCopy = Tree.builder().build();
                 BeanUtils.copyProperties(tree, treeCopy, IGNORE_PROPERTIES);
                 result.addItem(treeCopy);
+
+                boolean noNeddCheckRole = ((treeCopy.getRole() & RoleTest.write) == RoleTest.write) ||
+                    ((treeCopy.getRole() & RoleTest.read) == RoleTest.read);
+                checkRole = !noNeddCheckRole;
             }
         }
 
@@ -126,9 +132,7 @@ public class Main {
 
         if(tree.getTrees() != null) {
             for(Tree item : tree.getTrees()) {
-                boolean notCheckRole = !checkRole || ((item.getRole() & RoleTest.write) == RoleTest.write) ||
-                    ((item.getRole() & RoleTest.read) == RoleTest.read);
-                roleTree(item, treeCopy, !notCheckRole);
+                roleTree(item, treeCopy, checkRole, roleTreeIds);
             }
         }
     }
@@ -155,8 +159,6 @@ public class Main {
      * 层序输出
      */
     private static void print(Tree tree) {
-        log.info("层序输出");
-
         Queue<Tree> queue = new LinkedList<Tree>();
         queue.offer(tree);
         int level = -1;
@@ -176,7 +178,7 @@ public class Main {
                         ROLE_TREE.add(treeLevel);
                     }
                     else if(randomInt < 5) {
-                        RoleTest.setShowRole(treeLevel);
+                        RoleTest.setReadRole(treeLevel);
                         ROLE_TREE.add(treeLevel);
                     }
                 }
@@ -212,7 +214,6 @@ public class Main {
                 .pid(ptree.getId())
                 .build();
             item.setTrace(ptree.getTrace() + String.format(TRACE_FORMAT, item.getId()));
-            //RoleTest.setReadRole(item);
 
             int size = new Random().nextInt(10);
 
