@@ -1,5 +1,6 @@
 package com.yimian.dynamicProxy.javassist;
 
+import com.yimian.util.JsonUtils;
 import javassist.*;
 import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Method;
@@ -27,8 +28,8 @@ public class JavassistMain {
         Class _class = Class.forName("com.yimian.model.Hua");
         log.info("_class {}", _class.getName());
 
-        Method m = _class.getMethod("toJson", String.class);
-        Object result = m.invoke(hua, new Object[] {"json"});
+        Method m = _class.getMethod("toJson", String.class, JsonUtils.class);
+        Object result = m.invoke(hua, new Object[] {"json", Class.forName("com.yimian.util.JsonUtils").newInstance()});
         log.info("result {}", result);
     }
 
@@ -45,6 +46,10 @@ public class JavassistMain {
 
         CtClass ctClassUtil = pool.getCtClass("com.yimian.util.JsonUtils");
 
+       /* CtField nameFildUtil = new CtField(ctClassUtil, "util", ctClass);
+        nameFildUtil.setModifiers(Modifier.PRIVATE);
+        ctClass.addField(nameFildUtil);*/
+
         //CtFields 字段
         CtField nameFild = new CtField(pool.getCtClass("java.lang.String"), "name", ctClass);
         nameFild.setModifiers(Modifier.PRIVATE);
@@ -55,11 +60,11 @@ public class JavassistMain {
         ctClass.addMethod(CtNewMethod.setter("setName", nameFild));
 
         CtMethod ctMethod = new CtMethod(pool.getCtClass("java.lang.String"), "toJson",
-            new CtClass[] {pool.getCtClass("com.yimian.util.JsonUtils")}, ctClass);
+            new CtClass[] {pool.getCtClass("java.lang.String"), ctClassUtil}, ctClass);
         ctMethod.setModifiers(Modifier.PUBLIC);
         StringBuffer buffer = new StringBuffer();
         buffer.append("{\n")
-            .append("System.out.println(\"toJson = \" + JsonUtils.toJson($1));")
+            .append("System.out.println(\"toJson = \" + $2.toJson($1));")
             .append("System.out.println(\"toJson => \" + $1);")
             .append("return $1;")
             .append("\n}");
